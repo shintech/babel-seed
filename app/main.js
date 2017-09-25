@@ -1,4 +1,4 @@
-import App from 'backbone_app'
+import App from './App'
 import Router from './router'
 
 global.jQuery = require('jquery')
