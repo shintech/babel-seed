@@ -1,18 +1,17 @@
-import express from 'express'
-import bodyParser from 'body-parser'
 import path from 'path'
-import favicon from 'serve-favicon'
 import http from 'http'
 import logger from 'winston'
 import chalk from 'chalk'
-import getRouter from './router'
 import init from './db'
 import config from './config'
+import {getStatusCodeStyle} from 'shintech-utils'
 
 const _pkg = require(path.join(path.dirname(__dirname), 'package.json'))
-const _bootstrapDir = require.resolve('bootstrap').match(/.*\/node_modules\/[^/]+\//)[0]
 
-const app = express()
+const app = require('./app')({
+  logger: logger
+})
+
 const server = http.Server(app)
 
 const port = process.env['PORT']
@@ -24,20 +23,24 @@ const db = init({
   config: config
 })
 
-const router = getRouter({
+const router = require('./router')({
   logger: logger,
   db: db
 })
 
-app.use(favicon(path.join(__dirname, 'resources', 'images', 'favicon.png')))
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-app.use('/css', express.static(path.join(_bootstrapDir, 'dist', 'css')))
-app.use(express.static(path.join(__dirname, 'static')))
-app.use(router)
+app.use('/api', router)
+
+app.use(function (req, res) {
+  res.status(400)
+  .json({
+    status: 'error',
+    message: '404: Not Found'
+  })
+})
 
 server.on('request', (req, res) => {
-  logger.info(req.method, req.url)
+  const status = getStatusCodeStyle(res.statusCode, req.method)
+  logger[status.level](`${status.code} - ${status.method} => ${req.url} ${status.message}`)
 })
 
 server.on('listening', () => {

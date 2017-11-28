@@ -1,10 +1,9 @@
 import express from 'express'
-import users from './routes/users'
-import home from './routes//home'
+import {home, users} from './routes'
 
 const router = express.Router()
 
-export default function (options) {
+module.exports = function (options) {
   const { db } = options
 
   configParams(router, db)
