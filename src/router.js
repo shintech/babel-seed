@@ -27,8 +27,8 @@ function configParams (router, db) {
 
 function configRoutes (router, options) {
   router.route('/home')
-  .get(home(options).index)
+  .get(home(options).home)
 
   router.route('/user/:username')
-  .get(users(options).getUser)
+  .get(users(options).get)
 }
